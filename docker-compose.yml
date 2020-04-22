@@ -3,6 +3,7 @@ services:
   ipapp:
     build:
       context: .
+    image: juris/ipapp
     ports:
       - "80:80"
       - "443:443"
