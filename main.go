@@ -17,7 +17,6 @@ func init() {
 	router.Use(
 		middleware.Logger,
 		middleware.Recoverer,
-		middleware.DefaultCompress,
 	)
 }
 
