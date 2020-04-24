@@ -3,7 +3,7 @@ services:
   ipapp:
     build:
       context: .
-    image: juris/ipapp
+    image: docker.pkg.github.com/juris/ipapp/ipapp
     ports:
       - "80:80"
       - "443:443"

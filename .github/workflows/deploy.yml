@@ -1,0 +1,51 @@
+name: Deployment
+
+on:
+  push:
+    branches: [ master ]
+
+env:
+  TARGET_DIR: "/opt/ipapp"
+
+jobs:
+  prepare-and-deploy:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Prepare remote directory
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.REMOTE_HOST }}
+        username: ${{ secrets.REMOTE_USER }}
+        key: ${{ secrets.REMOTE_KEY }}
+        envs: TARGET_DIR
+        script: |
+          if [ ! -d "${TARGET_DIR}" ]; then
+            sudo mkdir -p ${TARGET_DIR}
+            sudo chown -R ${LOGNAME}:${LOGNAME} ${TARGET_DIR}
+          fi
+          
+    - name: Checkout
+      uses: actions/checkout@v2.1.0
+
+    - name: Sync docker-compose.yml
+      uses: easingthemes/ssh-deploy@v2.1.1
+      env:
+        REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+        REMOTE_USER: ${{ secrets.REMOTE_USER }}
+        SSH_PRIVATE_KEY: ${{ secrets.REMOTE_KEY }}
+        ARGS: "-avH --delete"
+        SOURCE: "docker-compose.yml"
+        TARGET: ${{ env.TARGET_DIR }}
+
+    - name: Start ipapp
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.REMOTE_HOST }}
+        username: ${{ secrets.REMOTE_USER }}
+        key: ${{ secrets.REMOTE_KEY }}
+        envs: TARGET_DIR
+        script: |
+          docker pull docker.pkg.github.com/juris/ipapp/ipapp
+          cd ${TARGET_DIR} && docker-compose up -d
