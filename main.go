@@ -34,6 +34,7 @@ func main() {
 		w.Write([]byte(ip + "\n"))
 	})
 
+        log.Printf("Starting app on %s", port)
 	log.Fatal(http.ListenAndServe(port, router))
 
 }
